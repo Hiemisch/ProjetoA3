@@ -3,7 +3,7 @@
 Victor Leme Beltran RA: 819120683
 Gabriel Hiemisch Ribeiro Cordeiro RA: 819155925
 
-Para este programa, realizamos 3 operações de CRUD, no caso, inserção, deleção, atualização de registros, bem como seleção para visualização de registros desejados. Tudo isto é realizado por meio da plataforma com acesso direto à um banco de dados. No caso foi utilizado MySQL.
+Para este programa, realizamos 3 operações de CRUD, no caso, inserção, deleção, atualização de registros, bem como seleção para visualização de registros desejados. Tudo isto é realizado por meio da plataforma com acesso direto à um banco de dados. No caso foi utilizado MySQL. No caso, para todas as operações, são basicamente realizadas queries com strings formatadas como o esperado.
 
 Para a inserção, detemos 4 tabelas passíveis de inserção, selecionáveis pela selectbox na parte superior da interface. Para a inserção é necessário se atentar aos valores nos campos obrigatórios, os quais variam de tabela para tabela. No caso mais simples temos a de tipo clientes, onde no caso inserimos um novo tipo com o nome "novo_tipo!"
 ![image](https://github.com/Hiemisch/ProjetoA3/assets/77108992/1701c8af-ab1f-459d-8c77-ab0b87422999)
