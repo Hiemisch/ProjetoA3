@@ -4,6 +4,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -16,8 +19,7 @@ public class Projeto_a3 {
     static final String PASS = "password";
     static final tabelasDB tabelas = new tabelasDB();
     
-    public static List<Map<String, String>> selectInDB (int TABLE_ID, String nomeTabela){
-        String QUERY = String.format("SELECT * FROM %s", nomeTabela);
+    public static List<Map<String, String>> selectInDB (int TABLE_ID, String nomeTabela, String QUERY){
         System.out.println("EL ID ÉS " + TABLE_ID);
         System.out.println("Lets see how the query goes " + QUERY);
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
@@ -43,6 +45,7 @@ public class Projeto_a3 {
             }
             stmt.close();
             return results;
+            
         } catch (SQLException e) {
             System.out.println(e);
             return null;
@@ -63,12 +66,13 @@ public class Projeto_a3 {
 
             pstmt.setObject(1, valor);
             pstmt.setInt(2, id);
-
             int rowsAffected = pstmt.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Registro alterado com sucesso!", "Success", JOptionPane.INFORMATION_MESSAGE);
             return rowsAffected > 0 ? 200 : 500;
 
         } catch (SQLException e) {
             System.out.println(e);
+            JOptionPane.showMessageDialog(null, "Não foi possivel alterar seu registro, verifique os campos!", "Error", JOptionPane.ERROR_MESSAGE);
             return 500;
         }
     }
@@ -107,14 +111,21 @@ public class Projeto_a3 {
             } else if (objeto instanceof tipoGrupo tipoGrupo) {
                 pstmt.setString(1, tipoGrupo.getNome());
             }
+            int rowsAffected = 0;
+            try {rowsAffected = pstmt.executeUpdate();
 
-            int rowsAffected = pstmt.executeUpdate();
+            } catch (Exception e){
+                JOptionPane.showMessageDialog(null, "Erro, verifique os campos!", "Error", JOptionPane.ERROR_MESSAGE);
+                return 500;
+            }
+            JOptionPane.showMessageDialog(null, "Registro incluido com sucesso", "Success", JOptionPane.INFORMATION_MESSAGE);
             return rowsAffected > 0 ? 200 : 500;
 
         } catch (SQLException e) {
-            System.out.println(e);
+            JOptionPane.showMessageDialog(null, "Erro, verifique os campos!", "Error", JOptionPane.ERROR_MESSAGE);
             return 500;
         }
+        
     };
     
     public static boolean deleteInDB(String nomeTabela, String campo, String filtro) {
@@ -126,10 +137,12 @@ public class Projeto_a3 {
             pstmt.setString(1, filtro);
 
             int rowsAffected = pstmt.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Registro excluido com sucesso", "Success", JOptionPane.INFORMATION_MESSAGE);
             return rowsAffected > 0;
 
         } catch (SQLException e) {
             System.out.println(e);
+            JOptionPane.showMessageDialog(null, "Erro, verifique os campos!", "Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }

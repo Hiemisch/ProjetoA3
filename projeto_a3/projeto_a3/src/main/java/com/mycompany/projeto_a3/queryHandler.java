@@ -59,7 +59,7 @@ public class queryHandler {
                 String nome = resultadoQuery.getString("nome_cliente");
                 String cpf_cliente = resultadoQuery.getString("cpf_cliente");
                 int tipo = resultadoQuery.getInt("tipo_cliente");
-                int grupo_cliente = resultadoQuery.getInt("grupo_cliente");
+                int grupo_cliente = resultadoQuery.getInt("id_grupo_cliente");
                 
 
                 // Create TipoCliente object and add to the list
