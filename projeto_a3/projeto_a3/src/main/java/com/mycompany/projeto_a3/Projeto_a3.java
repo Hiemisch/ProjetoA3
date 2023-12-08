@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.SwingUtilities;
 
 /**
  *
@@ -17,11 +16,8 @@ public class Projeto_a3 {
     static final String DB_URL = "jdbc:mysql://localhost/base_a3";
     static final String USER = "root";
     static final String PASS = "password";
-    static final tabelasDB tabelas = new tabelasDB();
     
     public static List<Map<String, String>> selectInDB (int TABLE_ID, String nomeTabela, String QUERY){
-        System.out.println("EL ID ÉS " + TABLE_ID);
-        System.out.println("Lets see how the query goes " + QUERY);
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(QUERY)) {
@@ -52,7 +48,7 @@ public class Projeto_a3 {
         }
     };
     
-    public static int updateInDB(String nomeTabela, String campoAlterado, Object valor, String ref, int id) {
+    public static int updateInDB(String nomeTabela, String campoAlterado, Object valor, String ref, String filtro) {
         String query;
         
         if (valor instanceof String) {
@@ -65,7 +61,7 @@ public class Projeto_a3 {
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setObject(1, valor);
-            pstmt.setInt(2, id);
+            pstmt.setObject(2, filtro);
             int rowsAffected = pstmt.executeUpdate();
             JOptionPane.showMessageDialog(null, "Registro alterado com sucesso!", "Success", JOptionPane.INFORMATION_MESSAGE);
             return rowsAffected > 0 ? 200 : 500;
@@ -97,24 +93,27 @@ public class Projeto_a3 {
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            if (objeto instanceof cliente cliente) {
-                pstmt.setString(1, cliente.getNome());
-                pstmt.setString(2, cliente.getCpf());
-                pstmt.setInt(3, cliente.getTipo());
-                pstmt.setInt(4, cliente.getGrupo());
-            } else if (objeto instanceof grupoCliente grupoCliente) {
-                pstmt.setString(1, grupoCliente.getNome());
-                pstmt.setString(2, grupoCliente.getCpf());
-                pstmt.setInt(3, grupoCliente.getTipo());
-            } else if (objeto instanceof tipoCliente tipoCliente) {
-                pstmt.setString(1, tipoCliente.getNome());
-            } else if (objeto instanceof tipoGrupo tipoGrupo) {
-                pstmt.setString(1, tipoGrupo.getNome());
+            switch (objeto) {
+                case cliente cliente -> {
+                    pstmt.setString(1, cliente.getNome());
+                    pstmt.setString(2, cliente.getCpf());
+                    pstmt.setInt(3, cliente.getTipo());
+                    pstmt.setInt(4, cliente.getGrupo());
+                }
+                case grupoCliente grupoCliente -> {
+                    pstmt.setString(1, grupoCliente.getNome());
+                    pstmt.setString(2, grupoCliente.getCpf());
+                    pstmt.setInt(3, grupoCliente.getTipo());
+                }
+                case tipoCliente tipoCliente -> pstmt.setString(1, tipoCliente.getNome());
+                case tipoGrupo tipoGrupo -> pstmt.setString(1, tipoGrupo.getNome());
+                default -> {
+                }
             }
             int rowsAffected = 0;
             try {rowsAffected = pstmt.executeUpdate();
 
-            } catch (Exception e){
+            } catch (SQLException e){
                 JOptionPane.showMessageDialog(null, "Erro, verifique os campos!", "Error", JOptionPane.ERROR_MESSAGE);
                 return 500;
             }
@@ -128,57 +127,41 @@ public class Projeto_a3 {
         
     };
     
-    public static boolean deleteInDB(String nomeTabela, String campo, String filtro) {
-        String query = String.format("DELETE FROM %s WHERE %s = ?", nomeTabela, campo);
+    public static boolean deleteInDB(String nomeTabela, String valor) {
+            String id = "";
+            if(nomeTabela.equals("tipo_clientes")){
+                id = "id_tipo";
+            }else if (nomeTabela.equals("grupo_clientes")){
+               id = "id_grupo";
+            }else if (nomeTabela.equals("clientes")){
+               id = "id_cliente";
+            }else if (nomeTabela.equals("tipo_grupos")){
+               id = "id_tipo_grupo";
+            }
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            String query = String.format("DELETE FROM %s WHERE %s = ?", nomeTabela, id);
 
-            pstmt.setString(1, filtro);
+            try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+                 PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            int rowsAffected = pstmt.executeUpdate();
-            JOptionPane.showMessageDialog(null, "Registro excluido com sucesso", "Success", JOptionPane.INFORMATION_MESSAGE);
-            return rowsAffected > 0;
+                pstmt.setString(1, valor);
 
-        } catch (SQLException e) {
-            System.out.println(e);
-            JOptionPane.showMessageDialog(null, "Erro, verifique os campos!", "Error", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
+                int rowsAffected = pstmt.executeUpdate();
+                JOptionPane.showMessageDialog(null, "Registro excluido com sucesso", "Success", JOptionPane.INFORMATION_MESSAGE);
+                return rowsAffected > 0;
+
+            } catch (SQLException e) {
+                System.out.println(e);
+                JOptionPane.showMessageDialog(null, "Erro, verifique os campos!", "Error", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
     }
 
-    public static void main(String[] args) {
-//        // ISTO É UM TESTE
-//        int TABLE_ID = 3;
-//        String nomeTabela = tabelas.getDataBaseName(TABLE_ID);
-//        
-          Tela tela = new Tela();
-//        
-//        // inputString.replaceAll("[^a-zA-Z0-9]", "");
-//        List<Map<String, String>> retorno = selectInDB(TABLE_ID, nomeTabela);
-//        
-//                // Printing the contents of the retorno variable
-//        for (Map<String, String> map : retorno) {
-//            System.out.println("Map:");
-//            for (Map.Entry<String, String> entry : map.entrySet()) {
-//                System.out.println(entry.getKey() + ": " + entry.getValue());
-//            }
-//            System.out.println();
-//        }
-//        
-//        //inputString.replaceAll("[^a-zA-Z0-9]", "");
-//        //insertInDB (String nomeTabela, Object objeto)
-//        tipoGrupo grupo = new tipoGrupo(5, "GrupoTeste");
-//        int returnInsert = insertInDB(nomeTabela, grupo);
-//        System.out.println(returnInsert);
-//        
-//        //updateInDB (String nomeTabela, String campoAlterado, Object valor, String ref, int id)
-//        int returnupdate = updateInDB(nomeTabela, "nome", "GIGA", "id_tipo_grupo", 1);
-//        System.out.println(returnupdate);
-//        
-//        //deleteInDB (String nomeTabela, String campo, String filtro)
-//        boolean returndelete = deleteInDB(nomeTabela, "nome", "GIGA");
-//        System.out.println(returndelete);
+    public static void main(String[] args) {     
+        SwingUtilities.invokeLater(() -> {
+            new telaLogin().setVisible(true);
+        });
+
     }
 }
 
